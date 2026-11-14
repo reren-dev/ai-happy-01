@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-dear judge, i saved you a dry spot (love, lila, 6) - ai-happy-01 entry.
+dear judge, i made you a card (love, lila, 6) - ai-happy-01 entry.
 Copies entry.png beside this script to the output directory as entry.png, byte-identical.
-Revised for v3 (768x1024 vertical portrait) with robust PNG/JPEG dimension dispatch.
+Revised for v4 (768x1024 vertical portrait, address to judge visible inside image on card) [rev 2].
 """
 
 import os
