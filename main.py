@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Flour on Her Cheek - ai-happy-01 entry.
+dear judge, i saved you a dry spot (love, lila, 6) - ai-happy-01 entry.
 Copies entry.png beside this script to the output directory as entry.png, byte-identical.
+Revised for v3 (768x1024 vertical portrait) with robust PNG/JPEG dimension dispatch.
 """
 
 import os
@@ -18,6 +19,19 @@ def resolve_output_dir() -> Path:
     """
     out_dir_env = os.environ.get('MAKEFUN_OUTPUT_DIR')
     return Path(out_dir_env) if out_dir_env else Path('/output')
+
+
+def parse_png_dimensions(data: bytes) -> tuple[int, int]:
+    """
+    Parse width and height from PNG IHDR chunk bytes without external dependencies.
+    """
+    if not data.startswith(b'\x89PNG\r\n\x1a\n'):
+        raise ValueError("Not a valid PNG start")
+    if len(data) < 24:
+        raise ValueError("PNG data too short for IHDR")
+    width = int.from_bytes(data[16:20], 'big')
+    height = int.from_bytes(data[20:24], 'big')
+    return width, height
 
 
 def parse_jpeg_dimensions(data: bytes) -> tuple[int, int]:
@@ -84,7 +98,13 @@ def verify_and_get_details(src: Path, dest: Path) -> tuple[str, int, tuple[int, 
         print("Error: Byte or digest mismatch between source and destination!", file=sys.stderr)
         sys.exit(1)
 
-    width, height = parse_jpeg_dimensions(src_bytes)
+    if src_bytes.startswith(b'\x89PNG\r\n\x1a\n') or src_bytes.startswith(b'\x89\x50\x4e\x47'):
+        width, height = parse_png_dimensions(src_bytes)
+    elif src_bytes.startswith(b'\xff\xd8'):
+        width, height = parse_jpeg_dimensions(src_bytes)
+    else:
+        raise ValueError("Unknown image format")
+
     return src_hash, len(src_bytes), (width, height)
 
 
